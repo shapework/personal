@@ -6,6 +6,7 @@ const ContentCard = ({
   icon,
   headerBgColor = "bg-accent",
   isPopover = false,
+  reverse = false,
   onClick,
 }: {
   title: string;
@@ -13,6 +14,7 @@ const ContentCard = ({
   icon: React.ReactNode;
   headerBgColor: string;
   isPopover?: boolean;
+  reverse?: boolean;
   onClick: () => void;
 }) => {
   return (
@@ -25,8 +27,9 @@ const ContentCard = ({
     >
       <figure
         className={clsx(
-          "text-4xl p-8 gap-4 flex items-center justify-center text-white",
+          "text-4xl p-8 gap-4 flex items-center justify-center",
           headerBgColor,
+          reverse ? "text-black" : "text-white",
           isPopover ? "rounded-t-xl" : "rounded-none",
         )}
       >

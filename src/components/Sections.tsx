@@ -18,7 +18,8 @@ const Info = () => {
     {
       rotation: Math.random() * 25,
       icon: <FaCode />,
-      headerBgColor: "bg-secondary",
+      headerBgColor: "bg-base-100",
+      reverse: true,
       title: "Web",
       description: skill.web.join(", "),
     },
@@ -45,24 +46,50 @@ const Info = () => {
     },
   ];
 
-  const positions = [
-    {
-      top: "10%",
-      left: "30%",
-    },
-    {
-      top: "10%",
-      left: "50%",
-    },
-    {
-      top: "40%",
-      left: "30%",
-    },
-    {
-      top: "40%",
-      left: "50%",
-    },
-  ];
+  // Generate non-overlapping random positions within the visible area
+  const positions = useMemo(() => {
+    const maxTopPercent = 150;  // keep inside container
+    const maxLeftPercent = 80; // keep inside container
+    const minDistancePercent = 18; // minimum center-to-center distance to avoid overlap
+
+    type Pos = { top: number; left: number };
+
+    const distance = (a: Pos, b: Pos) => {
+      const dx = a.left - b.left;
+      const dy = a.top - b.top;
+      return Math.hypot(dx, dy);
+    };
+
+    const generated: Pos[] = [];
+    let attempts = 0;
+    const maxAttempts = 1000;
+
+    while (generated.length < cards.length && attempts < maxAttempts) {
+      const candidate: Pos = {
+        top: Math.random() * maxTopPercent,
+        left: Math.random() * maxLeftPercent,
+      };
+      const ok = generated.every((p) => distance(p, candidate) >= minDistancePercent);
+      if (ok) generated.push(candidate);
+      attempts++;
+    }
+
+    // Fallback to a simple grid if random placement didn't finish in time
+    if (generated.length < cards.length) {
+      const remaining = cards.length - generated.length;
+      const rows = Math.ceil((generated.length + remaining) / 2);
+      for (let i = 0; i < remaining; i++) {
+        const idx = generated.length + i;
+        const row = Math.floor(idx / 2);
+        const col = idx % 2;
+        const top = rows > 1 ? (row * (maxTopPercent / (rows - 1))) : maxTopPercent / 2;
+        const left = col * maxLeftPercent;
+        generated.push({ top, left });
+      }
+    }
+
+    return generated.map((p) => ({ top: `${p.top}%`, left: `${p.left}%` }));
+  }, [cards.length]);
 
   const mobilePositions = [
     {
@@ -101,12 +128,12 @@ const Info = () => {
     <h1 className="text-2xl text-white nova-square-regular w-5/6 md:w-full flex justify-center h-36 md:h-0">
         <Typewriter
             onInit={(typewriter) => {
-              typewriter.typeString("I'm a full-stack Web Developer...").pauseFor(2000).deleteAll(1).typeString("and a Graphic Designer.").start();
+              typewriter.pauseFor(1000).typeString("I'm a full-stack Web Developer...").pauseFor(2000).deleteAll(1).typeString("and a Graphic Designer.").start();
             }}
             options={{
-              delay: 25,
+              delay: 40,
               cursor: "<",
-              cursorClassName: "text-warning",
+              cursorClassName: "text-warning animate-pulse",
             }}
           />
         </h1>
@@ -118,7 +145,7 @@ const Info = () => {
           initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
           animate={{
             opacity: 1,
-            scale: Math.random() * 0.4 + 0.6,
+            scale: Math.random() * 1 + 0.6,
             rotate: card.rotation,
           }}
           transition={{
@@ -144,6 +171,7 @@ const Info = () => {
           }}
         >
           <ContentCard
+            reverse={card.reverse}
             title={card.title}
             icon={card.icon}
             headerBgColor={card.headerBgColor}
@@ -191,6 +219,7 @@ const Info = () => {
                   icon={cards[selectedIndex].icon}
                   headerBgColor={cards[selectedIndex].headerBgColor}
                   isPopover={true}
+                  reverse={cards[selectedIndex].reverse}
                   onClick={() => setSelectedIndex(selectedIndex)}
                 />
               </motion.div>
@@ -209,10 +238,10 @@ const Chat = () => {
       <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
       <Typewriter
             onInit={(typewriter) => {
-              typewriter.typeString("I am an \"one question AI\" of this guy.").pauseFor(1500).start();
+              typewriter.pauseFor(1000).typeString("I am an \"one question AI\" of this guy.").pauseFor(1500).start();
             }}
             options={{
-              delay: 25,
+              delay: 40,
               deleteSpeed: 1,
               cursor: "",
             }}
@@ -220,7 +249,7 @@ const Chat = () => {
           <small className="text-neutral-500 caveat-regular">
           <Typewriter
             onInit={(typewriter) => {
-              typewriter.pauseFor(2500).typeString("and I don't know anything beyond that....").start();
+              typewriter.pauseFor(3000).typeString("and I don't know anything beyond that....").start();
             }}
             options={{
               delay: 25,
