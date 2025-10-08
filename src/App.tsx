@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import "./App.css";
 import info_bg from "../public/assets/bg_1_resize.jpg";
-import chat_bg from "../public/assets/bg_chat_2.svg";
+import chat_bg from "../public/assets/bg_chat.jpg";
 
 import { FaCircleInfo } from "react-icons/fa6";
 import { RiChatSmileAiLine } from "react-icons/ri";

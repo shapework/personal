@@ -6,6 +6,7 @@ export const skill = {
     "typescript",
     "reactjs",
     "nextjs",
+    "express",
     "tailwind",
     "bootstrap",
     "python",

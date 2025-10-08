@@ -1,14 +1,14 @@
+import { useMemo, useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useMemo, useState, useRef } from "react";
 import { ContentCard } from "./Cards";
 import { skill, about, projects } from "../data";
 import Typewriter from 'typewriter-effect';
+import clsx from "clsx";
 
 import { FaCode } from "react-icons/fa6";
 import { RiLayoutMasonryFill } from "react-icons/ri";
 import { IoFingerPrint } from "react-icons/io5";
 import { SiNounproject } from "react-icons/si";
-
 
 const Info = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -233,12 +233,35 @@ const Info = () => {
 };
 
 const Chat = () => {
+  const [question, setQuestion] = useState("");
+  const [response, setResponse] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
+
+  const handleSend = () => {
+    setIsLoading(true);
+    setIsDone(false);
+    fetch(`/ask?question=${question}`).then((res) => res.json()).then((data) => setResponse(data.response));
+  }
+
+  useEffect(() => {
+    if (response) {
+      setIsLoading(false);
+      setIsDone(true);
+      const contact = response.includes("[contact]");
+      if (contact) {
+        alert("Include contact method");
+        setResponse(response.replace("[contact]", ""));
+      }
+    }
+  }, [response]);
+
   return (
-    <div className="md:w-2/3 w-5/6 relative h-screen flex flex-col items-center justify-between gap-12">
+    <div className="md:w-2/3 w-5/6 relative h-screen flex flex-col items-center justify-evenly gap-12">
       <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
       <Typewriter
             onInit={(typewriter) => {
-              typewriter.pauseFor(1000).typeString("I am an \"one question AI\" of this guy.").pauseFor(1500).start();
+              typewriter.pauseFor(1000).typeString("I am \"one question AI\"").pauseFor(1500).start();
             }}
             options={{
               delay: 40,
@@ -249,7 +272,7 @@ const Chat = () => {
           <small className="text-neutral-500 caveat-regular">
           <Typewriter
             onInit={(typewriter) => {
-              typewriter.pauseFor(3000).typeString("and I don't know anything beyond that....").start();
+              typewriter.pauseFor(3000).typeString("You can ask me about Terry...").start();
             }}
             options={{
               delay: 25,
@@ -259,13 +282,36 @@ const Chat = () => {
           />
           </small>
         </h1>
-        <div className="flex flex-col items-center gap-4 md:w-2/3 w-full mb-16">
+        <div className="flex flex-col items-center gap-24 md:w-2/3 w-full mb-16 relative">
+        <div className="flex flex-col items-center gap-8 w-full">
         <textarea 
-        className="textarea textarea-bordered w-full h-48 focus:outline-none border-none text-center resize-none md:h-96 h-60" 
+        className="textarea w-full focus:outline-none min-h-24 text-center resize-none bg-white border-neutral-100 shadow-lg p-4" 
         placeholder="Ask me a question"
         maxLength={300}
+        onChange={(e) => setQuestion(e.target.value)}
+        disabled={isLoading || isDone}
         ></textarea>
-        <button className="btn btn-soft btn-secondary btn-wide">Send</button>
+        {response && <Typewriter
+            onInit={(typewriter) => {
+              typewriter.pauseFor(1000).typeString(response).pauseFor(1500).start();
+            }}
+            options={{
+              delay: 5,
+              deleteSpeed: 1,
+              cursor: "",
+            }}
+          />}
+        </div>
+        <button 
+        className={clsx("btn btn-wide", 
+          isLoading || isDone || question.length === 0 && "cursor-not-allowed",
+          question.length === 0 ? "" : "btn-warning",
+        )} onClick={handleSend}
+        disabled={isLoading || isDone || question.length === 0}
+        >
+          {isLoading && <span className="loading loading-spinner"></span>}
+          Send
+          </button>
         </div>
     </div>
   );
