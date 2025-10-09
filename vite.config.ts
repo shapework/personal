@@ -7,5 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     cors: false,
+    allowedHosts: ['immune-noticeably-tortoise.ngrok-free.app'],
   },
 });

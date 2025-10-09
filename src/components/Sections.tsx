@@ -4,6 +4,7 @@ import { ContentCard } from "./Cards";
 import { skill, about, projects } from "../data";
 import Typewriter from 'typewriter-effect';
 import clsx from "clsx";
+import { ProjectCards } from "./Cards";
 
 import { FaCode } from "react-icons/fa6";
 import { RiLayoutMasonryFill } from "react-icons/ri";
@@ -42,7 +43,7 @@ const Info = () => {
       icon: <SiNounproject size={50} />,
       headerBgColor: "bg-success",
       title: "Projects",
-      description: projects.projects.map((project) => project.name).join(", "),
+      description: <ProjectCards projects={projects} />,
     },
   ];
 
@@ -126,7 +127,8 @@ const Info = () => {
   return (
     <div className="flex flex-col items-center gap-12 md:w-2/3 w-full">
     <h1 className="text-2xl text-white nova-square-regular w-5/6 md:w-full flex justify-center h-36 md:h-0">
-        <Typewriter
+    I'm a full-stack Web Developer and Graphic Designer.
+        {/* <Typewriter
             onInit={(typewriter) => {
               typewriter.pauseFor(1000).typeString("I'm a full-stack Web Developer...").pauseFor(2000).deleteAll(1).typeString("and a Graphic Designer.").start();
             }}
@@ -135,7 +137,7 @@ const Info = () => {
               cursor: "<",
               cursorClassName: "text-warning animate-pulse",
             }}
-          />
+          /> */}
         </h1>
     <div className="w-full relative h-96 flex-col items-center">
       {cards.map((card, index) => (
@@ -176,6 +178,7 @@ const Info = () => {
             icon={card.icon}
             headerBgColor={card.headerBgColor}
             onClick={() => setSelectedIndex(index)}
+            onClose={() => setSelectedIndex(null)}
           />
         </motion.div>
       ))}
@@ -207,7 +210,7 @@ const Info = () => {
               dragMomentum={false}
               dragConstraints={dragRef}
                 layoutId={`card-${selectedIndex}`}
-                className="card max-w-full shadow-xl flex flex-col items-center"
+                className="card max-w-full flex flex-col items-center"
                 onClick={(e) => {
                   // Prevent closing when clicking inside the card content
                   e.stopPropagation();
@@ -215,12 +218,13 @@ const Info = () => {
               >
                 <ContentCard
                   title={cards[selectedIndex].title}
-                  description={cards[selectedIndex].description}
+                  description={cards[selectedIndex].description as string}
                   icon={cards[selectedIndex].icon}
                   headerBgColor={cards[selectedIndex].headerBgColor}
                   isPopover={true}
                   reverse={cards[selectedIndex].reverse}
                   onClick={() => setSelectedIndex(selectedIndex)}
+                  onClose={() => setSelectedIndex(null)}
                 />
               </motion.div>
             </motion.div>
@@ -237,11 +241,27 @@ const Chat = () => {
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [visitors, setVisitors] = useState(
+    {
+      haveVisited: false,
+      number_of_visits: 0,
+    });
 
   const handleSend = () => {
     setIsLoading(true);
     setIsDone(false);
     fetch(`/ask?question=${question}`).then((res) => res.json()).then((data) => setResponse(data.response));
+  }
+
+  const handleGetVisitors = () => {
+    fetch("/visitors").then((res) => res.json()).then((data) => {
+      setVisitors({
+        haveVisited: data.response > 0,
+        number_of_visits: data.response,
+      });
+      console.log("Number of visits: ", data.response);
+      console.log("Have visited: ", data.response > 0);
+    });
   }
 
   useEffect(() => {
@@ -256,12 +276,44 @@ const Chat = () => {
     }
   }, [response]);
 
+  useEffect(() => {
+    handleGetVisitors();
+  }, []);
+
   return (
     <div className="md:w-2/3 w-5/6 relative h-screen flex flex-col items-center justify-evenly gap-12">
-      <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
-      <Typewriter
+      {!visitors.haveVisited && (
+          <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
+        <Typewriter
+              onInit={(typewriter) => {
+                typewriter.pauseFor(300).typeString("Hello, I am \"one question AI\"").pauseFor(1500).start();
+              }}
+              options={{
+                delay: 40,
+                deleteSpeed: 1,
+                cursor: "",
+              }}
+            />
+            <small className="text-neutral-500 caveat-regular">
+            <Typewriter
+              onInit={(typewriter) => {
+                typewriter.pauseFor(2000).typeString("You can ask me about Terry...").start();
+              }}
+              options={{
+                delay: 25,
+                deleteSpeed: 1,
+                cursor: "",
+              }}
+            />
+            </small>
+          </h1>
+        )}
+
+      {visitors.haveVisited && visitors.number_of_visits <= 3 && (
+        <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
+          <Typewriter
             onInit={(typewriter) => {
-              typewriter.pauseFor(1000).typeString("I am \"one question AI\"").pauseFor(1500).start();
+              typewriter.pauseFor(300).typeString("I think I've seen you before...").pauseFor(1500).start();
             }}
             options={{
               delay: 40,
@@ -270,22 +322,38 @@ const Chat = () => {
             }}
           />
           <small className="text-neutral-500 caveat-regular">
-          <Typewriter
-            onInit={(typewriter) => {
-              typewriter.pauseFor(3000).typeString("You can ask me about Terry...").start();
-            }}
-            options={{
-              delay: 25,
-              deleteSpeed: 1,
-              cursor: "",
-            }}
-          />
-          </small>
+            <Typewriter
+              onInit={(typewriter) => {
+                typewriter.pauseFor(2000).typeString("Ask me about Terry if you want to know more about him.").start();
+              }}
+              options={{
+                delay: 25,
+                deleteSpeed: 1,
+                cursor: "",
+              }}
+            />
+            </small>
         </h1>
+      )}
+      
+        {visitors.haveVisited && visitors.number_of_visits > 3 && (
+          <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
+        <Typewriter
+              onInit={(typewriter) => {
+                typewriter.pauseFor(300).typeString("I've seen you. You should contact Terry.").pauseFor(1500).start();
+              }}
+              options={{
+                delay: 40,
+                deleteSpeed: 1,
+                cursor: "",
+              }}
+            />
+          </h1>
+        )}
         <div className="flex flex-col items-center gap-24 md:w-2/3 w-full mb-16 relative">
         <div className="flex flex-col items-center gap-8 w-full">
         <textarea 
-        className="textarea w-full focus:outline-none min-h-24 text-center resize-none bg-white border-neutral-100 shadow-lg p-4" 
+        className="textarea w-full focus:outline-none min-h-24 text-center resize-none bg-transparent border-none p-4" 
         placeholder="Ask me a question"
         maxLength={300}
         onChange={(e) => setQuestion(e.target.value)}
