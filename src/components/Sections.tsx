@@ -76,7 +76,7 @@ const Info = () => {
 
   // Generate non-overlapping random positions within the visible area
   const positions = useMemo(() => {
-    const maxTopPercent = 150; // keep inside container
+    const maxTopPercent = 80; // keep inside container
     const maxLeftPercent = 80; // keep inside container
     const minDistancePercent = 18; // minimum center-to-center distance to avoid overlap
 
@@ -129,11 +129,11 @@ const Info = () => {
     },
 
     {
-      top: "40%",
+      top: "30%",
       left: "20%",
     },
     {
-      top: "80%",
+      top: "60%",
       left: "20%",
     },
     {
@@ -155,7 +155,7 @@ const Info = () => {
   );
 
   return (
-    <div className="flex flex-col items-center gap-12 md:w-2/3 w-full">
+    <div className="flex flex-col items-center gap-2 md:w-2/3 w-full relative">
       <h1 className="text-2xl text-white nova-square-regular w-5/6 md:w-full flex justify-center h-36 md:h-0">
         I'm a full-stack Web Developer and Graphic Designer.
         {/* <Typewriter
@@ -296,8 +296,8 @@ const Chat = () => {
           haveVisited: data.response > 0,
           number_of_visits: data.response,
         });
-        console.log("Number of visits: ", data.response);
-        console.log("Have visited: ", data.response > 0);
+        // console.log("Number of visits: ", data.response);
+        // console.log("Have visited: ", data.response > 0);
       });
   };
 
@@ -322,7 +322,7 @@ const Chat = () => {
   return (
     visitors.number_of_visits > 3 ? <Contact />
       : 
-      <div className="md:w-2/3 w-5/6 relative h-screen flex flex-col items-center justify-evenly gap-12">
+      <div className="md:w-2/3 w-5/6 relative flex flex-col items-center justify-evenly gap-12 md:pt-24">
       {!visitors.haveVisited && (
         <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
           <Typewriter
@@ -500,7 +500,7 @@ const Contact = () => {
     }
    }, [response]);
   return (
-    <div className="md:w-2/3 w-full relative h-screen flex flex-col items-center justify-center gap-6">
+    <div className="md:w-2/3 w-full relative flex flex-col items-center justify-center gap-6 md:pt-24">
       <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4 w-full">
       <Typewriter
             onInit={(typewriter) => {
