@@ -13,7 +13,7 @@ const db = admin.firestore();
 // Function to record visitor data
 const recordVisitor = async (ip: string) => {
     try {
-        const collectionRef = db.collection("one-question");
+        const collectionRef = db.collection("questions");
         const docRef = collectionRef.doc(ip);
         const docSnap = await docRef.get();
         if (docSnap.exists) {
@@ -36,7 +36,7 @@ const recordVisitor = async (ip: string) => {
 // Function to get visitor data
 const getVisitorData = async (ip: string) => {
     try {
-        const collectionRef = db.collection("one-question");
+        const collectionRef = db.collection("questions");
         const docRef = collectionRef.doc(ip);
         const docSnap = await docRef.get();
         return docSnap.exists ? docSnap.data() : null;

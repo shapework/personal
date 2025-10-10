@@ -142,9 +142,9 @@ const askAI = async (question: string) => await fetch(aiURL, {
 app.get("/ask", async (req, res) => {
   try {
     // Get user's IP address
-    const userIP = getUserIP(req);
-    console.log("User IP Address:", userIP);
-    await recordVisitor(userIP);
+    // const userIP = getUserIP(req);
+    // console.log("User IP Address:", userIP);
+    // await recordVisitor(userIP);
 
     const rawQuestion = req.query.question as string; 
     const sanitizedQuestion = sanitizeQuestion(rawQuestion);
@@ -162,6 +162,13 @@ app.get("/ask", async (req, res) => {
     console.error("Error in /ask endpoint:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+app.get("/record-ip", async (req, res) => {
+  console.log("Recording IP...");
+  const userIP = getUserIP(req);
+  await recordVisitor(userIP);
+  res.json({ response: "IP recorded" });
 });
 
 app.get("/visitors", async (req, res) => {

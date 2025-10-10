@@ -4,12 +4,33 @@ import { ContentCard } from "./Cards";
 import { skill, about, projects } from "../data";
 import Typewriter from 'typewriter-effect';
 import clsx from "clsx";
-import { ProjectCards } from "./Cards";
+import { ProjectCard, type Project } from "./Cards";
 
 import { FaCode } from "react-icons/fa6";
 import { RiLayoutMasonryFill } from "react-icons/ri";
 import { IoFingerPrint } from "react-icons/io5";
-import { SiNounproject } from "react-icons/si";
+// import { SiNounproject } from "react-icons/si";
+
+const WebCard = ({ projects }: { projects: Project[] }) => {
+  return (
+    <div className="flex flex-col gap-4">
+    {projects.map((project) => project.type === "web" ? (
+      <ProjectCard key={project.name} project={project} />
+    ) : null)}
+    </div>
+  );
+};
+
+const GraphicCard = ({ projects }: { projects: Project[] }) => {
+  return (
+    <div className="flex gap-4 md:flex-row flex-col">
+    {projects.map((project) => project.type === "graphic" ? (
+      <ProjectCard key={project.name} project={project} />
+    ) : null)}
+    </div>
+  );
+};
+
 
 const Info = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -23,6 +44,7 @@ const Info = () => {
       reverse: true,
       title: "Web",
       description: skill.web.join(", "),
+      reference: <WebCard projects={projects} />, 
     },
     {
       rotation: Math.random() * -25,
@@ -30,6 +52,7 @@ const Info = () => {
       headerBgColor: "bg-warning",
       title: "Graphic",
       description: skill.graphic.join(", "),
+      reference: <GraphicCard projects={projects} />,
     },
     {
       rotation: Math.random() * -25,
@@ -38,13 +61,13 @@ const Info = () => {
       title: "About",
       description: about.name + " / " + about.email + " / " + about.phone,
     },
-    {
-      rotation: Math.random() * 25,
-      icon: <SiNounproject size={50} />,
-      headerBgColor: "bg-success",
-      title: "Projects",
-      description: <ProjectCards projects={projects} />,
-    },
+    // {
+    //   rotation: Math.random() * 25,
+    //   icon: <SiNounproject size={50} />,
+    //   headerBgColor: "bg-success",
+    //   title: "Projects",
+    //   description: <ProjectCards projects={projects} />,
+    // },
   ];
 
   // Generate non-overlapping random positions within the visible area
@@ -210,7 +233,7 @@ const Info = () => {
               dragMomentum={false}
               dragConstraints={dragRef}
                 layoutId={`card-${selectedIndex}`}
-                className="card max-w-full flex flex-col items-center"
+                className="card flex flex-col items-center"
                 onClick={(e) => {
                   // Prevent closing when clicking inside the card content
                   e.stopPropagation();
@@ -225,6 +248,7 @@ const Info = () => {
                   reverse={cards[selectedIndex].reverse}
                   onClick={() => setSelectedIndex(selectedIndex)}
                   onClose={() => setSelectedIndex(null)}
+                  reference={cards[selectedIndex].reference}
                 />
               </motion.div>
             </motion.div>
@@ -238,9 +262,10 @@ const Info = () => {
 
 const Chat = () => {
   const [question, setQuestion] = useState("");
+  const [questionCount, setQuestionCount] = useState(0);
+  const [questionHistory, setQuestionHistory] = useState<string[]>([]);
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDone, setIsDone] = useState(false);
   const [visitors, setVisitors] = useState(
     {
       haveVisited: false,
@@ -249,7 +274,7 @@ const Chat = () => {
 
   const handleSend = () => {
     setIsLoading(true);
-    setIsDone(false);
+    setQuestionHistory([...questionHistory, question]);
     fetch(`/ask?question=${question}`).then((res) => res.json()).then((data) => setResponse(data.response));
   }
 
@@ -267,7 +292,6 @@ const Chat = () => {
   useEffect(() => {
     if (response) {
       setIsLoading(false);
-      setIsDone(true);
       const contact = response.includes("[contact]");
       if (contact) {
         alert("Include contact method");
@@ -286,7 +310,7 @@ const Chat = () => {
           <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
         <Typewriter
               onInit={(typewriter) => {
-                typewriter.pauseFor(300).typeString("Hello, I am \"one question AI\"").pauseFor(1500).start();
+                typewriter.pauseFor(300).typeString("Hello, You can ask me about Terry").pauseFor(1500).start();
               }}
               options={{
                 delay: 40,
@@ -294,7 +318,7 @@ const Chat = () => {
                 cursor: "",
               }}
             />
-            <small className="text-neutral-500 caveat-regular">
+            {/* <small className="text-neutral-500 caveat-regular">
             <Typewriter
               onInit={(typewriter) => {
                 typewriter.pauseFor(2000).typeString("You can ask me about Terry...").start();
@@ -305,15 +329,15 @@ const Chat = () => {
                 cursor: "",
               }}
             />
-            </small>
+            </small> */}
           </h1>
         )}
 
-      {visitors.haveVisited && visitors.number_of_visits <= 3 && (
+      {visitors.haveVisited && visitors.number_of_visits > 1 && visitors.number_of_visits <= 2 && (
         <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
           <Typewriter
             onInit={(typewriter) => {
-              typewriter.pauseFor(300).typeString("I think I've seen you before...").pauseFor(1500).start();
+              typewriter.pauseFor(300).typeString("I think we may have met before....").pauseFor(1500).start();
             }}
             options={{
               delay: 40,
@@ -321,7 +345,7 @@ const Chat = () => {
               cursor: "",
             }}
           />
-          <small className="text-neutral-500 caveat-regular">
+          {/* <small className="text-neutral-500 caveat-regular">
             <Typewriter
               onInit={(typewriter) => {
                 typewriter.pauseFor(2000).typeString("Ask me about Terry if you want to know more about him.").start();
@@ -332,15 +356,15 @@ const Chat = () => {
                 cursor: "",
               }}
             />
-            </small>
+            </small> */}
         </h1>
       )}
       
-        {visitors.haveVisited && visitors.number_of_visits > 3 && (
+        {visitors.haveVisited && visitors.number_of_visits > 2 && (
           <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4">
         <Typewriter
               onInit={(typewriter) => {
-                typewriter.pauseFor(300).typeString("I've seen you. You should contact Terry.").pauseFor(1500).start();
+                typewriter.pauseFor(300).typeString("I’ve noticed you, you should reach out to Terry.").pauseFor(1500).start();
               }}
               options={{
                 delay: 40,
@@ -350,16 +374,19 @@ const Chat = () => {
             />
           </h1>
         )}
-        <div className="flex flex-col items-center gap-24 md:w-2/3 w-full mb-16 relative">
-        <div className="flex flex-col items-center gap-8 w-full">
-        <textarea 
-        className="textarea w-full focus:outline-none min-h-24 text-center resize-none bg-transparent border-none p-4" 
-        placeholder="Ask me a question"
-        maxLength={300}
-        onChange={(e) => setQuestion(e.target.value)}
-        disabled={isLoading || isDone}
-        ></textarea>
-        {response && <Typewriter
+        <div className="flex flex-col items-center gap-8 md:w-2/3 w-full mb-16 relative">
+        <div className="flex flex-col items-between gap-2 w-full">
+        {questionHistory.map((question, index) => (
+          <div key={index} className="chat chat-start">
+          <div className="chat-bubble">
+            {question}
+          </div>
+        </div>
+        ))}
+        {response && 
+        <div className="chat chat-end">
+          <div className="chat-bubble">
+          <Typewriter
             onInit={(typewriter) => {
               typewriter.pauseFor(1000).typeString(response).pauseFor(1500).start();
             }}
@@ -368,18 +395,34 @@ const Chat = () => {
               deleteSpeed: 1,
               cursor: "",
             }}
-          />}
+          />
+          </div>
         </div>
+        }
+        </div>
+        <div className="flex flex-col items-center gap-2 w-full">
+        <textarea 
+        className="textarea w-full focus:outline-none min-h-36 text-center resize-none bg-white p-4" 
+        placeholder="Ask me questions"
+        maxLength={300}
+        onChange={(e) => setQuestion(e.target.value)}
+        disabled={isLoading || questionCount > 3}
+        ></textarea>
         <button 
         className={clsx("btn btn-wide", 
-          isLoading || isDone || question.length === 0 && "cursor-not-allowed",
+          isLoading || question.length === 0 || questionCount > 3 && "cursor-not-allowed",
           question.length === 0 ? "" : "btn-warning",
-        )} onClick={handleSend}
-        disabled={isLoading || isDone || question.length === 0}
+        )}
+        onClick={() => {
+          handleSend();
+          setQuestionCount(questionCount + 1);
+        }}
+        disabled={isLoading || question.length === 0 || questionCount > 3}
         >
           {isLoading && <span className="loading loading-spinner"></span>}
           Send
           </button>
+        </div>
         </div>
     </div>
   );

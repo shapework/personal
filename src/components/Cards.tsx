@@ -28,7 +28,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
   );
 };
 
-const ProjectCards = ({projects}: {projects: Project[]}) => {
+const ProjectCardGroup = ({projects}: {projects: Project[]}) => {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-6">
@@ -53,7 +53,8 @@ const ContentCard = ({
   isPopover = false,
   reverse = false,
   onClick,
-  onClose,
+  onClose = () => {},
+  reference,
 }: {
   title: string;
   description?: string;
@@ -62,13 +63,14 @@ const ContentCard = ({
   isPopover?: boolean;
   reverse?: boolean;
   onClick: () => void;
-  onClose: () => void;
+  onClose?: () => void;
+  reference?: React.ReactNode;
 }) => {
   return (
     <div
       className={clsx(
         "card h-fit cursor-pointer rounded-t-xl",
-        isPopover ? "shadow-xl md:max-w-1/2 md:min-w-96 w-5/6" : "",
+        isPopover ? "shadow-xl md:max-w-1/2 md:min-w-70 w-5/6 max-h-[500px] md:max-h-full overflow-y-auto" : "",
       )}
       onClick={onClick}
     >
@@ -84,8 +86,10 @@ const ContentCard = ({
         <h2 className="card-title text-3xl text caveat-semibold">{title}</h2>
       </figure>
       {description && (
-        <div className="card-body lexend-deca-light bg-base-100 rounded-b-xl flex flex-col gap-8">
-          <p>{description}</p>
+        <div className="card-body lexend-deca-light bg-base-100 rounded-b-xl flex flex-col gap-2">
+          <p className="text-lg text-center">{description}</p>
+          <div className="divider divider-content-base text-lg lexend-deca-bold">Reference</div>
+          {reference}
           <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="btn btn-soft btn-primary">Close</button>
         </div>
       )}
@@ -93,4 +97,4 @@ const ContentCard = ({
   );
 };
 
-export { ContentCard, ProjectCard, ProjectCards };
+export { ContentCard, ProjectCard, ProjectCardGroup, type Project };

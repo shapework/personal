@@ -11,12 +11,16 @@ import { RiChatSmileAiLine } from "react-icons/ri";
 
 function App() {
   const [browsing, setBrowsing] = useState("Info");
+
+  const handleRecordIP = () => {
+    fetch("/record-ip");
+  }
   return (
     <div
       style={{
         backgroundImage: `url(${browsing === "Info" ? info_bg : chat_bg})`,
       }}
-      className="w-full h-screen flex flex-col items-center justify-between py-12 bg-base-100 bg-cover bg-center"
+      className="w-full h-screen flex flex-col items-center justify-between md:py-12 py-6 bg-base-100 bg-cover bg-center"
     >
       <div
         className={clsx(
@@ -47,8 +51,11 @@ function App() {
         </div>
         <div
           className="swap-off text-white tooltip tooltip-open"
-          data-tip="ask me a question"
-          onClick={() => setBrowsing("Chat")}
+          data-tip="ask me questions"
+          onClick={() => {
+            setBrowsing("Chat");
+            handleRecordIP();
+          }}
         >
           <RiChatSmileAiLine />
         </div>
