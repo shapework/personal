@@ -27,3 +27,5 @@ _stock/*
 *.sw?
 
 shapework-personal-79b64def1f00.json
+# Local Netlify folder
+.netlify

@@ -29,7 +29,8 @@ export const projects = [
     type: "web",
     name: "Hong Kong Pickleball League",
     link: "https://www.hkpl.com.hk",
-    description: "Inculdes Club Management, Team Management, Player Management, Match Scheduling, Algorithm for Ranking and Head-to-Head Calculations, User Management System, Registration System, DUPR API Integration",
+    description:
+      "Inculdes Club Management, Team Management, Player Management, Match Scheduling, Algorithm for Ranking and Head-to-Head Calculations, User Management System, Registration System, DUPR API Integration",
   },
   {
     type: "web",
@@ -52,4 +53,10 @@ export const projects = [
     name: "Brochure",
     link: "./assets/brochure.jpg",
   },
+];
+
+export const dontKnow = [
+  "He does not create wordpress plugin.",
+  "He does not create wordpress theme.",
+  "He does not create Mobile App.",
 ];

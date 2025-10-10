@@ -14,7 +14,8 @@ function App() {
 
   const handleRecordIP = () => {
     fetch("/record-ip");
-  }
+  };
+
   return (
     <div
       style={{
@@ -29,13 +30,9 @@ function App() {
         )}
       ></div>
       {browsing === "Info" ? (
-      <div
-        className={clsx(
-          "z-10 flex-col items-center w-full flex"
-        )}
-      >
-        <Info />
-      </div>
+        <div className={clsx("z-10 flex-col items-center w-full flex")}>
+          <Info />
+        </div>
       ) : (
         <Chat />
       )}
