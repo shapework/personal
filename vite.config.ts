@@ -9,4 +9,17 @@ export default defineConfig({
     cors: false,
     allowedHosts: ["immune-noticeably-tortoise.ngrok-free.app"],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          // Set long cache for background images
+          if (assetInfo.name && (assetInfo.name.includes('bg_1_resize') || assetInfo.name.includes('bg_chat'))) {
+            return 'assets/bg/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      }
+    }
+  }
 });

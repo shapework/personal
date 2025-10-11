@@ -1,0 +1,31 @@
+{
+  "headers": [
+    {
+      "source": "/assets/bg/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2678400, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*\\.(jpg|jpeg|png|webp|avif))",
+      "headers": [
+        {
+          "key": "Cache-Control", 
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "minimumCacheTTL": 2678400,
+    "formats": ["image/webp"],
+    "remotePatterns": [],
+    "localPatterns": [],
+    "qualities": [75],
+    "imageSizes": [640, 750, 828, 1080, 1200, 1920, 2048],
+    "deviceSizes": [640, 750, 828, 1080, 1200, 1920, 2048]
+  }
+}
