@@ -8,7 +8,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), vercel()],
   server: {
     cors: false,
-    allowedHosts: ["immune-noticeably-tortoise.ngrok-free.app"],
+    allowedHosts: [
+      "immune-noticeably-tortoise.ngrok-free.app",
+      "terry.shapework.hk",
+    ],
   },
   build: {
     rollupOptions: {
