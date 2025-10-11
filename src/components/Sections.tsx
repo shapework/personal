@@ -286,7 +286,7 @@ const Chat = () => {
   const handleSend = () => {
     setIsLoading(true);
     setQuestionHistory([...questionHistory, question]);
-    fetch("/api/ask?question=${question}")
+    fetch(`/api/ask?question=${question}`)
       .then((res) => res.json())
       .then((data) => setResponse([...response, data.response]));
   };
