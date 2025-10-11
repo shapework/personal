@@ -11,6 +11,8 @@ export default defineConfig({
     allowedHosts: [
       "immune-noticeably-tortoise.ngrok-free.app",
       "terry.shapework.hk",
+      "api.longcat.chat",
+      "shapework-personal-default-rtdb.asia-southeast1.firebasedatabase.app"
     ],
   },
   build: {
