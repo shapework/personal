@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-if (!process.env.SMTP_USERNAME || !process.env.SMTP_PASSWORD) {
+if (!process.env.VITE_SMTP_USERNAME || !process.env.VITE_SMTP_PASSWORD) {
   throw new Error("SMTP_USERNAME and SMTP_PASSWORD are required");
 }
 

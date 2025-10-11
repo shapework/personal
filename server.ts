@@ -22,8 +22,8 @@ dotenv.config();
 const env = process.env.NODE_ENV;
 console.log("Environment:", env);
 
-const aiKey = process.env["LONG_CAT_API_KEY"];
-const aiURL = process.env["LONG_CAT_URL"];
+const aiKey = process.env.VITE_LONG_CAT_API_KEY;
+const aiURL = process.env.VITE_LONG_CAT_URL;
 
 if (!aiURL) {
   throw new Error("LONG_CAT_URL environment variable is required");
