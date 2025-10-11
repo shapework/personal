@@ -5,7 +5,12 @@ import vercel from 'vite-plugin-vercel';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/",
   plugins: [react(), tailwindcss(), vercel()],
+  define: {
+    // Make NODE_ENV available in the client
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
   server: {
     cors: false,
     allowedHosts: [

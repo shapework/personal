@@ -1,10 +1,7 @@
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 if (!process.env.VITE_SMTP_USERNAME || !process.env.VITE_SMTP_PASSWORD) {
-  throw new Error("SMTP_USERNAME and SMTP_PASSWORD are required");
+  throw new Error("VITE_SMTP_USERNAME and VITE_SMTP_PASSWORD are required");
 }
 
 type MailOptions = {
@@ -21,8 +18,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SMTP_USERNAME,
-    pass: process.env.SMTP_PASSWORD,
+    user: process.env.VITE_SMTP_USERNAME,
+    pass: process.env.VITE_SMTP_PASSWORD,
   },
 });
 

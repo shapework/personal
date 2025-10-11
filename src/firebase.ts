@@ -1,17 +1,21 @@
 import admin from "firebase-admin";
-// import serviceKeyJsonFile from "../shapework-personal-2ec7240bac98.json";
 import { FieldValue } from "firebase-admin/firestore";
 import dotenv from "dotenv";
 
 dotenv.config();
-// const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-// const serviceAccountConfig  = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string);
+const projectId = process.env.VITE_FIREBASE_ADMIN_PROJECT_ID;
+const clientEmail = process.env.VITE_FIREBASE_ADMIN_CLIENT_EMAIL;
+const privateKey = process.env.VITE_FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+if (!projectId || !clientEmail || !privateKey) {
+  throw new Error('Missing required Firebase Admin environment variables');
+}
 
 const serviceAccount = {
-  projectId: process.env.VITE_FIREBASE_ADMIN_PROJECT_ID,
-  clientEmail: process.env.VITE_FIREBASE_ADMIN_CLIENT_EMAIL,
-  privateKey: process.env.VITE_FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-};
+  project_id: projectId,
+  client_email: clientEmail,
+  private_key: privateKey,
+} as admin.ServiceAccount;
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({

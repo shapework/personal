@@ -2,17 +2,21 @@ import { useState } from "react";
 import { Info, Chat } from "./components/Sections";
 import { OptimizedBackground } from "./components/OptimizedBackground";
 import clsx from "clsx";
+// import { getEnvClient } from "./utils";
 
 import "./App.css";
 
 import { FaCircleInfo } from "react-icons/fa6";
 import { RiChatSmileAiLine } from "react-icons/ri";
 
+// const env = getEnvClient("NODE_ENV");
+
+
 function App() {
   const [browsing, setBrowsing] = useState("Info");
 
   const handleRecordIP = () => {
-    fetch("/record-ip");
+    fetch("/api/record-ip");
   };
 
   return (

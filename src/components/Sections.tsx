@@ -6,11 +6,14 @@ import Typewriter from "typewriter-effect";
 import clsx from "clsx";
 import { ProjectCard, type Project } from "./Cards";
 import { contactSchema } from "../validation";
+// import { getEnvClient } from "../utils";
 
 import { FaCode } from "react-icons/fa6";
 import { RiLayoutMasonryFill } from "react-icons/ri";
 import { IoFingerPrint } from "react-icons/io5";
 // import { SiNounproject } from "react-icons/si";
+
+// const env = getEnvClient("NODE_ENV");
 
 const WebCard = ({ projects }: { projects: Project[] }) => {
   return (
@@ -283,13 +286,13 @@ const Chat = () => {
   const handleSend = () => {
     setIsLoading(true);
     setQuestionHistory([...questionHistory, question]);
-    fetch(`/ask?question=${question}`)
+    fetch("/api/ask?question=${question}")
       .then((res) => res.json())
       .then((data) => setResponse([...response, data.response]));
   };
 
   const handleGetVisitors = () => {
-    fetch("/visitors")
+    fetch("/api/visitors")
       .then((res) => res.json())
       .then((data) => {
         setVisitors({
@@ -482,7 +485,7 @@ const Contact = () => {
       return;
     }
     setIsSubmitting(true);
-    fetch("/contact", {
+    fetch("/api/contact", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
