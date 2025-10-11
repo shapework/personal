@@ -6,7 +6,7 @@ headers = []
 [functions."*"]
 
 [build]
-publish = "F:\\Shapework\\_Portfolio\\web\\dist"
+publish = "dist"
 publishOrigin = "ui"
 commandOrigin = "ui"
 command = "pnpm run build"

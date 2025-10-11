@@ -161,72 +161,74 @@ const askAI = async (question: string) =>
 
 // API Routes
 // Handle both /ask and /api/ask for local development and production
-app.get("/ask", async (req, res) => {
-  try {
-    const rawQuestion = req.query.question as string;
-    const sanitizedQuestion = sanitizeQuestion(rawQuestion);
-    if (!sanitizedQuestion || sanitizedQuestion.length < 2) {
-      return res.status(400).json({
-        error:
-          "Invalid question. Please provide a valid question with at least 2 characters.",
-      });
-    }
+// app.post("/ask", async (req, res) => {
+//   try {
+//     const rawQuestion = req.body.question as string;
+//     const sanitizedQuestion = sanitizeQuestion(rawQuestion);
+//     if (!sanitizedQuestion || sanitizedQuestion.length < 2) {
+//       return res.status(400).json({
+//         error:
+//           "Invalid question. Please provide a valid question with at least 2 characters.",
+//       });
+//     }
 
-    const response = await askAI(sanitizedQuestion);
-    const aiResponse = (await response.json()) as AIResponse;
-    res.json({ response: aiResponse.choices[0].message.content });
-  } catch (error) {
-    console.error("Error in /ask endpoint:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     const response = await askAI(sanitizedQuestion);
+//     const aiResponse = (await response.json()) as AIResponse;
+//     res.json({ response: aiResponse.choices[0].message.content });
+//   } catch (error) {
+//     console.error("Error in /ask endpoint:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
-app.get("/record-ip", async (req, res) => {
-  const userIP = getUserIP(req);
-  await recordVisitor(userIP);
-  res.json({ response: "IP recorded" });
-});
+// app.get("/record-ip", async (req, res) => {
+//   const userIP = getUserIP(req);
+//   await recordVisitor(userIP);
+//   res.json({ response: "IP recorded" });
+// });
 
-app.get("/visitors", async (req, res) => {
-  const userIP = getUserIP(req);
-  const visitorData = await getVisitorData(userIP);
-  if (visitorData) {
-    res.json({ response: visitorData.number_of_visits });
-  } else {
-    console.log("No visitor data found");
-    res.json({ response: 0 });
-  }
-});
+// app.get("/visitors", async (req, res) => {
+//   const userIP = getUserIP(req);
+//   const visitorData = await getVisitorData(userIP);
+//   if (visitorData) {
+//     res.json({ response: visitorData.number_of_visits });
+//   } else {
+//     console.log("No visitor data found");
+//     res.json({ response: 0 });
+//   }
+// });
 
-app.post("/contact", async (req, res) => {
-  try {
-    const body = (req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
-    const parsed = contactSchema.safeParse(body);
+// app.post("/contact", async (req, res) => {
+//   try {
+//     const body = (req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
+//     const parsed = contactSchema.safeParse(body);
 
-    if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0]?.message ?? "Invalid payload";
-      return res.status(400).json({ response: firstIssue });
-    }
+//     if (!parsed.success) {
+//       const firstIssue = parsed.error.issues[0]?.message ?? "Invalid payload";
+//       return res.status(400).json({ response: firstIssue });
+//     }
 
-    const { name, email, message } = parsed.data;
-    const mailOptions = {
-      to: "terry@shapework.hk",
-      subject: "New Contact Form Submission",
-      message: `<h1>New Contact Form Submission</h1><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
-    };
-    await sendMail(mailOptions);
-    return res.json({ response: "Email sent" });
-  } catch (error) {
-    console.error("Error in /contact endpoint:", error);
-    return res.status(500).json({ response: "Internal server error" });
-  }
-});
+//     const { name, email, message } = parsed.data;
+//     const mailOptions = {
+//       to: "terry@shapework.hk",
+//       subject: "New Contact Form Submission",
+//       message: `<h1>New Contact Form Submission</h1><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
+//     };
+//     await sendMail(mailOptions);
+//     return res.json({ response: "Email sent" });
+//   } catch (error) {
+//     console.error("Error in /contact endpoint:", error);
+//     return res.status(500).json({ response: "Internal server error" });
+//   }
+// });
 
 // Production routes with /api prefix (for Netlify deployment)
 app.get("/api/ask", async (req, res) => {
   try {
     const rawQuestion = req.query.question as string;
+    console.log("Raw question: ", rawQuestion);
     const sanitizedQuestion = sanitizeQuestion(rawQuestion);
+    console.log("Sanitized question: ", sanitizedQuestion);
     if (!sanitizedQuestion || sanitizedQuestion.length < 2) {
       return res.status(400).json({
         error:
