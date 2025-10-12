@@ -1,12 +1,12 @@
 import express from "express";
 import cookieSession from "cookie-session";
 import compression from "compression";
-import { dontKnow, skill } from "./data";
+import { dontKnow, skill } from "../data";
 import helmet from "helmet";
 import crypto from "crypto";
-import { recordVisitor, getVisitorData } from "./firebase";
-import { contactSchema } from "./validation";
-import { sendMail } from "./send-mail";
+import { recordVisitor, getVisitorData } from "../firebase";
+import { contactSchema } from "../validation";
+import { sendMail } from "../send-mail";
 
 interface AIResponse {
   choices: Array<{
@@ -34,44 +34,6 @@ const data =
 
 const systemPrompt = `Answer questions only using the provided data: ${data}. If the requested information is not present in the data, respond with: 'I only have information about Terry...', DON'T ANSWER ANYTHING ELSE. If the question is English, MUST answer in English. If the question is Traditional Chinese, MUST answer in Traditional Chinese.`
 
-const app = express();
-
-// Middleware configuration
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-      },
-    },
-  }),
-);
-
-const expireDate = new Date(Date.now() + 60 * 60 * 1000);
-app.use(
-  cookieSession({
-    name: "session",
-    keys: [crypto.randomBytes(32).toString("hex")],
-    maxAge: expireDate.getTime(),
-    secure: env === "production",
-    httpOnly: true,
-    sameSite: "lax",
-  }),
-);
-
-app.use(compression());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.disable("x-powered-by");
-// Trust proxy to get real IP addresses
-app.set("trust proxy", true);
-
-// Function to sanitize input and prevent injection attacks
 const sanitizeQuestion = (input: string): string => {
   if (!input || typeof input !== "string") {
     return "";
@@ -159,6 +121,44 @@ const askAI = async (question: string) =>
     }),
   });
 
+const app = express();
+const router = express.Router()
+
+// Middleware configuration
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+      },
+    },
+  }),
+);
+
+const expireDate = new Date(Date.now() + 60 * 60 * 1000);
+app.use(
+  cookieSession({
+    name: "session",
+    keys: [crypto.randomBytes(32).toString("hex")],
+    maxAge: expireDate.getTime(),
+    secure: env === "production",
+    httpOnly: true,
+    sameSite: "lax",
+  }),
+);
+
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
+// Trust proxy to get real IP addresses
+app.set("trust proxy", true);
+
 // API Routes
 // Handle both /ask and /api/ask for local development and production
 // app.post("/ask", async (req, res) => {
@@ -223,7 +223,7 @@ const askAI = async (question: string) =>
 // });
 
 // Production routes with /api prefix (for Netlify deployment)
-app.get("/api/ask", async (req, res) => {
+router.get("/ask", async (req, res) => {
   try {
     const rawQuestion = req.query.question as string;
     console.log("Raw question: ", rawQuestion);
@@ -241,17 +241,17 @@ app.get("/api/ask", async (req, res) => {
     res.json({ response: aiResponse.choices[0].message.content });
   } catch (error) {
     console.error("Error in /api/ask endpoint:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Oops! Something went wrong. Please try again later." });
   }
 });
 
-app.get("/api/record-ip", async (req, res) => {
+router.get("/record-ip", async (req, res) => {
   const userIP = getUserIP(req);
   await recordVisitor(userIP);
   res.json({ response: "IP recorded" });
 });
 
-app.get("/api/visitors", async (req, res) => {
+router.get("/visitors", async (req, res) => {
   const userIP = getUserIP(req);
   const visitorData = await getVisitorData(userIP);
   if (visitorData) {
@@ -262,7 +262,7 @@ app.get("/api/visitors", async (req, res) => {
   }
 });
 
-app.post("/api/contact", async (req, res) => {
+router.post("/contact", async (req, res) => {
   try {
     const body = (req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
     const parsed = contactSchema.safeParse(body);
@@ -273,6 +273,9 @@ app.post("/api/contact", async (req, res) => {
     }
 
     const { name, email, message } = parsed.data;
+    console.log("Name: ", name);
+    console.log("Email: ", email);
+    console.log("Message: ", message);
     const mailOptions = {
       to: "terry@shapework.hk",
       subject: "New Contact Form Submission",
@@ -285,5 +288,7 @@ app.post("/api/contact", async (req, res) => {
     return res.status(500).json({ response: "Internal server error" });
   }
 });
+
+app.use("/api", router);
 
 export default app;

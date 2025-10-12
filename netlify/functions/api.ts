@@ -1,6 +1,6 @@
 import type { Handler, HandlerEvent, HandlerContext, HandlerResponse } from '@netlify/functions';
 import serverless from 'serverless-http';
-import app from '../../src/app';
+import app from '../../src/api';
 
 // Create the serverless handler
 const serverlessHandler = serverless(app);

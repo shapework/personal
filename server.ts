@@ -1,5 +1,5 @@
 import ViteExpress from "vite-express";
-import app from "./src/app";
+import app from "./src/api";
 
 const env = process.env.NODE_ENV;
 console.log("Environment:", env);

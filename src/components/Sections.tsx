@@ -281,6 +281,7 @@ const Chat = () => {
     haveVisited: false,
     number_of_visits: 0,
   });
+  const [error, setError] = useState("");
   // const [needContact, setNeedContact] = useState(false);
 
   const handleSend = () => {
@@ -288,7 +289,8 @@ const Chat = () => {
     setQuestionHistory([...questionHistory, question]);
     fetch(`/api/ask?question=${question}`)
       .then((res) => res.json())
-      .then((data) => setResponse([...response, data.response]));
+      .then((data) => setResponse([...response, data.response]))
+      .catch((err) => setError(err.message));
   };
 
   const handleGetVisitors = () => {
@@ -424,13 +426,21 @@ const Chat = () => {
           <textarea
             className="textarea w-full focus:outline-none min-h-36 text-center resize-none bg-white p-4"
             placeholder="Ask me questions"
+            defaultValue={questionCount > 1 ? "Feel free to contact me with email: terry@shapework.hk" : ""}
             maxLength={300}
             onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.ctrlKey) {
+                handleSend();
+                setQuestionCount(questionCount + 1);
+              }
+            }}
             disabled={isLoading || questionCount > 1}
           ></textarea>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             className={clsx(
-              "btn btn-wide",
+              "btn btn-wide gap-2",
               isLoading ||
                 question.length === 0 ||
                 (questionCount > 3 && "cursor-not-allowed"),
@@ -444,6 +454,7 @@ const Chat = () => {
           >
             {isLoading && <span className="loading loading-spinner"></span>}
             Send
+            <small>[Ctrl + Enter]</small>
           </button>
         </div>
       </div>
