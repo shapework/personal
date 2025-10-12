@@ -280,6 +280,7 @@ const Chat = () => {
   const [visitors, setVisitors] = useState({
     haveVisited: false,
     number_of_visits: 0,
+    isLoading: true,
   });
   const [error, setError] = useState("");
   // const [needContact, setNeedContact] = useState(false);
@@ -300,9 +301,18 @@ const Chat = () => {
         setVisitors({
           haveVisited: data.response > 0,
           number_of_visits: data.response,
+          isLoading: false,
         });
         // console.log("Number of visits: ", data.response);
         // console.log("Have visited: ", data.response > 0);
+      })
+      .catch((error) => {
+        console.error("Error fetching visitors:", error);
+        setVisitors({
+          haveVisited: false,
+          number_of_visits: 0,
+          isLoading: false,
+        });
       });
   };
 
@@ -323,6 +333,30 @@ const Chat = () => {
   useEffect(() => {
     handleGetVisitors();
   }, []);
+
+  // Show loading state while waiting for visitors API response
+  if (visitors.isLoading) {
+    return (
+      <div className="md:w-2/3 w-5/6 h-96 relative flex flex-col items-center justify-center gap-12 md:pt-24">
+        <div className="flex flex-col items-center gap-4">
+          <span className="loading loading-spinner loading-lg"></span>
+          <Typewriter
+            onInit={(typewriter) => {
+              typewriter
+                .pauseFor(200)
+                .typeString("Loading...")
+                .start();
+            }}
+            options={{
+              delay: 40,
+              deleteSpeed: 1,
+              cursor: "|",
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     visitors.number_of_visits > 3 ? <Contact />

@@ -264,7 +264,8 @@ router.get("/visitors", async (req, res) => {
 
 router.post("/contact", async (req, res) => {
   try {
-    const body = (req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
+    const body = JSON.parse(req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
+    // console.log("Body: ", body);
     const parsed = contactSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -273,9 +274,9 @@ router.post("/contact", async (req, res) => {
     }
 
     const { name, email, message } = parsed.data;
-    console.log("Name: ", name);
-    console.log("Email: ", email);
-    console.log("Message: ", message);
+    // console.log("Name: ", name);
+    // console.log("Email: ", email);
+    // console.log("Message: ", message);
     const mailOptions = {
       to: "terry@shapework.hk",
       subject: "New Contact Form Submission",
