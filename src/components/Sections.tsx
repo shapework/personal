@@ -15,6 +15,11 @@ import { IoFingerPrint } from "react-icons/io5";
 
 // const env = getEnvClient("NODE_ENV");
 
+interface Response {
+  message: string;
+  status: string;
+}
+
 const WebCard = ({ projects }: { projects: Project[] }) => {
   return (
     <div className="flex flex-col gap-4">
@@ -274,7 +279,7 @@ const Chat = () => {
   const [question, setQuestion] = useState("");
   const [questionCount, setQuestionCount] = useState(0);
   const [questionHistory, setQuestionHistory] = useState<string[]>([]);
-  const [response, setResponse] = useState<string[]>([]);
+  const [response, setResponse] = useState<Response[]>([]);
   const [hasNewResponse, setHasNewResponse] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [visitors, setVisitors] = useState({
@@ -282,7 +287,7 @@ const Chat = () => {
     number_of_visits: 0,
     isLoading: true,
   });
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   // const [needContact, setNeedContact] = useState(false);
 
   const handleSend = () => {
@@ -290,8 +295,8 @@ const Chat = () => {
     setQuestionHistory([...questionHistory, question]);
     fetch(`/api/ask?question=${question}`)
       .then((res) => res.json())
-      .then((data) => setResponse([...response, data.response]))
-      .catch((err) => setError(err.message));
+      .then((data) => setResponse([...response, {message: data.message, status: data.status}]))
+      .catch((err) => setResponse([...response, {message: err.message ?? "Oops! Something went wrong. Please try again later.", status: err.status}]));
   };
 
   const handleGetVisitors = () => {
@@ -320,13 +325,14 @@ const Chat = () => {
     if (response.length > 0) {
       setHasNewResponse(true);
       setIsLoading(false);
-      const lastResponse = response[response.length - 1];
-      const contact = lastResponse.includes("[contact]");
-      if (contact) {
-        // setNeedContact(true);
-        // alert("Include contact method");
-        setResponse([...response.slice(0, -1), lastResponse.replace("[contact]", "")]);
-      }
+      // console.log("Response: ", response);
+      // const lastResponse = response[response.length - 1];
+      // const contact = lastResponse.response.includes("[contact]");
+      // if (contact) {
+      //   // setNeedContact(true);
+      //   // alert("Include contact method");
+      //   setResponse([...response.slice(0, -1), {response: lastResponse.response.replace("[contact]", ""), status: lastResponse.status}]);
+      // }
     }
   }, [response]);
 
@@ -428,13 +434,12 @@ const Chat = () => {
               </div>
               {response[index] && (
                 <div className="chat chat-end md:w-2/3 w-full self-end">
-                  <div className="chat-bubble text-sm">
+                  <div className={clsx("chat-bubble text-sm", response[index].status === "ERROR" && "chat-bubble-error")}>
                     {index === response.length - 1 && hasNewResponse ? (
                       <Typewriter
                         onInit={(typewriter) => {
                           typewriter
-                            .pauseFor(1000)
-                            .typeString(response[index])
+                            .typeString(response[index].message)
                             .pauseFor(1500)
                             .callFunction(() => {
                               setHasNewResponse(false);
@@ -448,7 +453,7 @@ const Chat = () => {
                         }}
                       />
                     ) : (
-                      response[index]
+                      response[index].message
                     )}
                   </div>
                 </div>
@@ -471,7 +476,7 @@ const Chat = () => {
             }}
             disabled={isLoading || questionCount > 1}
           ></textarea>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {/* {response[response.length - 1] && response[response.length - 1].status === "ERROR" && <p className="text-red-500 text-sm">{response[response.length - 1].response}</p>} */}
           <button
             className={clsx(
               "btn btn-wide gap-2",
@@ -499,11 +504,11 @@ const Chat = () => {
 const Contact = () => {
   const [errors, setErrors] = useState<{ name: string, email: string, message: string }>({ name: "", email: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [response, setResponse] = useState<string>("");
+  const [response, setResponse] = useState<Response>({message: "", status: ""});
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setResponse("");
+    setResponse({message: "", status: ""});
     const form = e.currentTarget;
     const formData = new FormData(form);
     const name = formData.get("name") as string;
@@ -538,32 +543,37 @@ const Contact = () => {
       body: JSON.stringify({ name, email, message }),
     })
       .then((res) => res.json())
-      .then((data) => setResponse(data.response))
-      .catch(() => setResponse("Something went wrong. Please try again."));
+      .then((data) => setResponse({message: data.response, status: data.status}))
+      .catch((err) => setResponse({message: err.response, status: err.status}));
     // console.log(name, email, message);
   };
    useEffect(() => {
-    if (response.length > 0) {
+    if (response.status === "SUCCESS" || response.status === "ERROR") {
       setIsSubmitting(false);
+      console.log("Response: ", response);
     }
    }, [response]);
   return (
     <div className="md:w-2/3 w-full relative flex flex-col items-center justify-center gap-6 md:pt-24">
-      <h1 className="text-5xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4 w-full">
+      <h1 className="text-4xl text-neutral-800 caveat-semibold flex flex-col items-center gap-4 w-full px-8">
       <Typewriter
-            onInit={(typewriter) => {
-              typewriter
-                .pauseFor(300)
-                .typeString("Get in touch")
-                .pauseFor(1500)
-                .start();
-            }}
-            options={{
-              delay: 40,
-              deleteSpeed: 1,
-              cursor: "",
-            }}
-          />
+        key={response.status}
+        onInit={(typewriter) => {
+          typewriter
+            .typeString(response.status === "SUCCESS" 
+              ? "Thank you for taking the time to play with me!" 
+              : response.status === "ERROR" 
+              ? "Something's off with my brain at the moment. Let's try this again soon." 
+              : "Get in touch")
+            .start();
+        }}
+        options={{
+          delay: 20,
+          deleteSpeed: 1,
+          cursor: "",
+          wrapperClassName: response.status === "SUCCESS" ? "text-green-500" : response.status === "ERROR" ? "text-error" : "text-neutral-800",
+        }}
+      />
       </h1>
       <div className="flex flex-col items-center gap-4 md:w-1/2 w-5/6">
         <form className="w-full flex flex-col items-center gap-4" onSubmit={handleSubmit}>
@@ -597,7 +607,7 @@ const Contact = () => {
             }}
             ></textarea>
           </fieldset>
-          <p className="text-red-500 text-sm">{response}</p>
+          {/* <p className="text-red-500 text-sm">{response.message}</p> */}
           <button className="btn btn-primary btn-wide" type="submit">{isSubmitting && <span className="loading loading-spinner"></span>} Submit</button>
         </form>
         

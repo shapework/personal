@@ -85,10 +85,10 @@ const ContentCard = ({
     >
       <figure
         className={clsx(
-          "text-4xl p-8 gap-4 flex items-center justify-center",
+          "gap-4 flex items-center justify-center",
           headerBgColor,
           reverse ? "text-black" : "text-white",
-          isPopover ? "rounded-t-xl" : "rounded-none",
+          isPopover ? "rounded-t-xl text-4xl p-8" : "rounded-full h-36 w-36 text-lg",
         )}
       >
         <span>{icon}</span>{" "}

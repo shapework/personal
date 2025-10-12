@@ -18,11 +18,11 @@ interface AIResponse {
 
 const env = process.env.NODE_ENV;
 
-const aiKey = process.env.VITE_LONG_CAT_API_KEY;
-const aiURL = process.env.VITE_LONG_CAT_URL;
+const aiKey = process.env.VITE_AI_CHAT_API_KEY;
+const aiURL = process.env.VITE_AI_CHAT_URL;
 
 if (!aiURL) {
-  throw new Error("LONG_CAT_URL environment variable is required");
+  throw new Error("VITE_AI_CHAT_URL environment variable is required");
 }
 
 const data =
@@ -32,7 +32,7 @@ const data =
   skill.graphic.join(", ") +
   "." + dontKnow.join(". ") + ".";
 
-const systemPrompt = `Answer questions only using the provided data: ${data}. If the requested information is not present in the data, respond with: 'I only have information about Terry...', DON'T ANSWER ANYTHING ELSE. If the question is English, MUST answer in English. If the question is Traditional Chinese, MUST answer in Traditional Chinese.`
+const systemPrompt = `Answer questions only using the provided data: ${data}. If the requested information is not present in the data, respond with: 'For further details, reach out to Terry.', DON'T ANSWER ANYTHING ELSE. If the question is English, MUST answer in English. If the question is Traditional Chinese, MUST answer in Traditional Chinese.`
 
 const sanitizeQuestion = (input: string): string => {
   if (!input || typeof input !== "string") {
@@ -98,8 +98,9 @@ const getUserIP = (req: express.Request) => {
   );
 };
 
-const askAI = async (question: string) =>
-  await fetch(aiURL, {
+const askAI = async (question: string) => {
+  console.log("Question: ", question);
+  const response = await fetch(aiURL, {
     headers: {
       Authorization: `Bearer ${aiKey}`,
       "Content-Type": "application/json",
@@ -107,6 +108,7 @@ const askAI = async (question: string) =>
     method: "POST",
     body: JSON.stringify({
       model: "LongCat-Flash-Chat",
+      // model: "deepseek/deepseek-chat-v3.1:free",
       messages: [
         {
           role: "system",
@@ -114,13 +116,15 @@ const askAI = async (question: string) =>
         },
         {
           role: "user",
-          content: question,
+          content: question as string,
         },
       ],
       max_tokens: 1000,
     }),
   });
-
+  return response;
+};
+  
 const app = express();
 const router = express.Router()
 
@@ -159,69 +163,6 @@ app.disable("x-powered-by");
 // Trust proxy to get real IP addresses
 app.set("trust proxy", true);
 
-// API Routes
-// Handle both /ask and /api/ask for local development and production
-// app.post("/ask", async (req, res) => {
-//   try {
-//     const rawQuestion = req.body.question as string;
-//     const sanitizedQuestion = sanitizeQuestion(rawQuestion);
-//     if (!sanitizedQuestion || sanitizedQuestion.length < 2) {
-//       return res.status(400).json({
-//         error:
-//           "Invalid question. Please provide a valid question with at least 2 characters.",
-//       });
-//     }
-
-//     const response = await askAI(sanitizedQuestion);
-//     const aiResponse = (await response.json()) as AIResponse;
-//     res.json({ response: aiResponse.choices[0].message.content });
-//   } catch (error) {
-//     console.error("Error in /ask endpoint:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
-// app.get("/record-ip", async (req, res) => {
-//   const userIP = getUserIP(req);
-//   await recordVisitor(userIP);
-//   res.json({ response: "IP recorded" });
-// });
-
-// app.get("/visitors", async (req, res) => {
-//   const userIP = getUserIP(req);
-//   const visitorData = await getVisitorData(userIP);
-//   if (visitorData) {
-//     res.json({ response: visitorData.number_of_visits });
-//   } else {
-//     console.log("No visitor data found");
-//     res.json({ response: 0 });
-//   }
-// });
-
-// app.post("/contact", async (req, res) => {
-//   try {
-//     const body = (req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
-//     const parsed = contactSchema.safeParse(body);
-
-//     if (!parsed.success) {
-//       const firstIssue = parsed.error.issues[0]?.message ?? "Invalid payload";
-//       return res.status(400).json({ response: firstIssue });
-//     }
-
-//     const { name, email, message } = parsed.data;
-//     const mailOptions = {
-//       to: "terry@shapework.hk",
-//       subject: "New Contact Form Submission",
-//       message: `<h1>New Contact Form Submission</h1><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
-//     };
-//     await sendMail(mailOptions);
-//     return res.json({ response: "Email sent" });
-//   } catch (error) {
-//     console.error("Error in /contact endpoint:", error);
-//     return res.status(500).json({ response: "Internal server error" });
-//   }
-// });
-
 // Production routes with /api prefix (for Netlify deployment)
 router.get("/ask", async (req, res) => {
   try {
@@ -231,17 +172,19 @@ router.get("/ask", async (req, res) => {
     console.log("Sanitized question: ", sanitizedQuestion);
     if (!sanitizedQuestion || sanitizedQuestion.length < 2) {
       return res.status(400).json({
-        error:
+        response:
           "Invalid question. Please provide a valid question with at least 2 characters.",
+        status: "ERROR",
       });
     }
 
     const response = await askAI(sanitizedQuestion);
     const aiResponse = (await response.json()) as AIResponse;
-    res.json({ response: aiResponse.choices[0].message.content });
+    console.log("AI response: ", aiResponse.choices[0].message.content);
+    res.json({ message: aiResponse.choices[0].message.content, status: "SUCCESS" });
   } catch (error) {
     console.error("Error in /api/ask endpoint:", error);
-    res.status(500).json({ error: "Oops! Something went wrong. Please try again later." });
+    res.status(500).json({ message: "Oops! Something went wrong. Please try again later.", status: "ERROR" });
   }
 });
 
@@ -265,28 +208,25 @@ router.get("/visitors", async (req, res) => {
 router.post("/contact", async (req, res) => {
   try {
     const body = JSON.parse(req.body ?? {}) as Partial<{ name: string; email: string; message: string }>;
-    // console.log("Body: ", body);
     const parsed = contactSchema.safeParse(body);
-
     if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0]?.message ?? "Invalid payload";
-      return res.status(400).json({ response: firstIssue });
+      // const firstIssue = parsed.error.issues[0]?.message ?? "Invalid payload";
+      return res.status(400).json({ message: "Invalid payload", status: "ERROR" });
     }
 
     const { name, email, message } = parsed.data;
-    // console.log("Name: ", name);
-    // console.log("Email: ", email);
-    // console.log("Message: ", message);
     const mailOptions = {
-      to: "terry@shapework.hk",
+      from: "terry@shapework.hk",
+      to: "terry.lau@shapework.hk",
       subject: "New Contact Form Submission",
       message: `<h1>New Contact Form Submission</h1><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
     };
     await sendMail(mailOptions);
-    return res.json({ response: "Email sent" });
+    // console.log("Email sent");
+    return res.json({ message: "Email sent", status: "SUCCESS" });
   } catch (error) {
     console.error("Error in /api/contact endpoint:", error);
-    return res.status(500).json({ response: "Internal server error" });
+    return res.status(500).json({ message: "Something’s off with my brain at the moment. Let’s try this again soon.", status: "ERROR" });
   }
 });
 
